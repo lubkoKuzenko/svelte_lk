@@ -4,13 +4,15 @@
   "sources": [
     "../App.svelte",
     "../Header.svelte",
+    "../Title.svelte",
     "../Title.svelte"
   ],
   "sourcesContent": [
     "<script>\n\timport Title from './Title.svelte';\n\timport Header from './Header.svelte';\n\n\texport let name = 'world';\n\texport let age = 0;\n\n\t$: nameC = `<b>calculation</b> ${age}`;\n\t$: if (age > 5){\n\t\tnameC = `Congradulations!`;\n\t};\n\n\tconst onAgeChange = () => age += 1;\n\tconst onInputChange = (event) => name = event.target.value;\n</script>\n\n<main>\n\t<Header />\n\t<Title title={name} />\n\t<h3>Age: {age}</h3>\n\t<p>{@html nameC}</p>\n\t<input type=\"text\" value={name} on:input={onInputChange} />\n\t<input type=\"text\" bind:value={name} />\n\t<button on:click={onAgeChange}>Change Age</button>\n</main>\n\n<style>\n\tmain {\n\t\ttext-align: center;\n\t\tpadding: 1em;\n\t\tmax-width: 240px;\n\t\tmargin: 0 auto;\n\t}\n\n\t@media (min-width: 640px) {\n\t\tmain {\n\t\t\tmax-width: none;\n\t\t}\n\t}\n</style>",
     "<script>\n  export let title;\n</script>\n\n<h1>Hello {title}!</h1>\n\n<style>\n  h1 {\n    color: #ff3e00;\n    text-transform: uppercase;\n    font-size: 4em;\n    font-weight: 100;\n  }\n</style>",
-    "<script>\n  export let title;\n</script>\n\n<h1>Hello {title}!</h1>\n\n<style>\n  h1 {\n    color: #ff3e00;\n    text-transform: uppercase;\n    font-size: 4em;\n    font-weight: 100;\n  }\n</style>"
+    "<script>\n  export let title;\n</script>\n\n<h1>{title}</h1>\n\n<style>\n  h1 {\n    font-size: 2em;\n    padding: 1rem 0;\n  }\n</style>",
+    "<script>\n  export let title;\n</script>\n\n<h1>{title}</h1>\n\n<style>\n  h1 {\n    font-size: 2em;\n    padding: 1rem 0;\n  }\n</style>"
   ],
   "names": [],
-  "mappings": "AA2BC,IAAI,eAAC,CAAC,AACL,UAAU,CAAE,MAAM,CAClB,OAAO,CAAE,GAAG,CACZ,SAAS,CAAE,KAAK,CAChB,MAAM,CAAE,CAAC,CAAC,IAAI,AACf,CAAC,AAED,MAAM,AAAC,YAAY,KAAK,CAAC,AAAC,CAAC,AAC1B,IAAI,eAAC,CAAC,AACL,SAAS,CAAE,IAAI,AAChB,CAAC,AACF,CAAC;AC/BA,EAAE,eAAC,CAAC,AACF,KAAK,CAAE,OAAO,CACd,cAAc,CAAE,SAAS,CACzB,SAAS,CAAE,GAAG,CACd,WAAW,CAAE,GAAG,AAClB,CAAC;ACLD,EAAE,eAAC,CAAC,AACF,KAAK,CAAE,OAAO,CACd,cAAc,CAAE,SAAS,CACzB,SAAS,CAAE,GAAG,CACd,WAAW,CAAE,GAAG,AAClB,CAAC"
+  "mappings": "AA2BC,IAAI,eAAC,CAAC,AACL,UAAU,CAAE,MAAM,CAClB,OAAO,CAAE,GAAG,CACZ,SAAS,CAAE,KAAK,CAChB,MAAM,CAAE,CAAC,CAAC,IAAI,AACf,CAAC,AAED,MAAM,AAAC,YAAY,KAAK,CAAC,AAAC,CAAC,AAC1B,IAAI,eAAC,CAAC,AACL,SAAS,CAAE,IAAI,AAChB,CAAC,AACF,CAAC;AC/BA,EAAE,eAAC,CAAC,AACF,KAAK,CAAE,OAAO,CACd,cAAc,CAAE,SAAS,CACzB,SAAS,CAAE,GAAG,CACd,WAAW,CAAE,GAAG,AAClB,CAAC;ACLD,EAAE,eAAC,CAAC,AACF,SAAS,CAAE,GAAG,CACd,OAAO,CAAE,IAAI,CAAC,CAAC,AACjB,CAAC;ACHD,EAAE,eAAC,CAAC,AACF,SAAS,CAAE,GAAG,CACd,OAAO,CAAE,IAAI,CAAC,CAAC,AACjB,CAAC"
 }
