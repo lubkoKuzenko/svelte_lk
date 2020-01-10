@@ -4,6 +4,12 @@ var app = (function () {
     'use strict';
 
     function noop() { }
+    function assign(tar, src) {
+        // @ts-ignore
+        for (const k in src)
+            tar[k] = src[k];
+        return tar;
+    }
     function add_location(element, file, line, column, char) {
         element.__svelte_meta = {
             loc: { file, line, column, char }
@@ -276,6 +282,43 @@ var app = (function () {
         while (n)
             insert(new_blocks[n - 1]);
         return new_blocks;
+    }
+
+    function get_spread_update(levels, updates) {
+        const update = {};
+        const to_null_out = {};
+        const accounted_for = { $$scope: 1 };
+        let i = levels.length;
+        while (i--) {
+            const o = levels[i];
+            const n = updates[i];
+            if (n) {
+                for (const key in o) {
+                    if (!(key in n))
+                        to_null_out[key] = 1;
+                }
+                for (const key in n) {
+                    if (!accounted_for[key]) {
+                        update[key] = n[key];
+                        accounted_for[key] = 1;
+                    }
+                }
+                levels[i] = n;
+            }
+            else {
+                for (const key in o) {
+                    accounted_for[key] = 1;
+                }
+            }
+        }
+        for (const key in to_null_out) {
+            if (!(key in update))
+                update[key] = undefined;
+        }
+        return update;
+    }
+    function get_spread_object(spread_props) {
+        return typeof spread_props === 'object' && spread_props !== null ? spread_props : {};
     }
     function create_component(block) {
         block && block.c();
@@ -819,7 +862,7 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	button1.$on("click", /*click_handler*/ ctx[5]);
+    	button1.$on("click", /*click_handler*/ ctx[6]);
 
     	const block = {
     		c: function create() {
@@ -844,23 +887,23 @@ var app = (function () {
     			t7 = text(/*date*/ ctx[2]);
     			if (img.src !== (img_src_value = "http://placehold.it/400x225")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
-    			add_location(img, file$3, 17, 4, 377);
+    			add_location(img, file$3, 18, 4, 410);
     			attr_dev(h5, "class", "card-title");
-    			add_location(h5, file$3, 19, 6, 460);
+    			add_location(h5, file$3, 20, 6, 493);
     			attr_dev(p, "class", "card-text");
-    			add_location(p, file$3, 20, 6, 502);
+    			add_location(p, file$3, 21, 6, 535);
     			attr_dev(div0, "class", "btn-group");
-    			add_location(div0, file$3, 22, 8, 616);
+    			add_location(div0, file$3, 23, 8, 649);
     			attr_dev(small, "class", "text-muted");
-    			add_location(small, file$3, 26, 8, 831);
+    			add_location(small, file$3, 27, 8, 864);
     			attr_dev(div1, "class", "d-flex justify-content-between align-items-center");
-    			add_location(div1, file$3, 21, 6, 544);
+    			add_location(div1, file$3, 22, 6, 577);
     			attr_dev(div2, "class", "card-body");
-    			add_location(div2, file$3, 18, 4, 430);
+    			add_location(div2, file$3, 19, 4, 463);
     			attr_dev(div3, "class", "card mb-4 shadow-sm");
-    			add_location(div3, file$3, 16, 2, 339);
+    			add_location(div3, file$3, 17, 2, 372);
     			attr_dev(div4, "class", "col-md-4");
-    			add_location(div4, file$3, 15, 0, 314);
+    			add_location(div4, file$3, 16, 0, 347);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -923,6 +966,7 @@ var app = (function () {
 
     function instance$2($$self, $$props, $$invalidate) {
     	const dispatch = createEventDispatcher();
+    	let { id = Math.random() } = $$props;
     	let { title } = $$props;
     	let { subtitle } = $$props;
     	let { date } = $$props;
@@ -931,7 +975,7 @@ var app = (function () {
     		dispatch("message", { text: "Hello!" });
     	};
 
-    	const writable_props = ["title", "subtitle", "date"];
+    	const writable_props = ["id", "title", "subtitle", "date"];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Event> was created with unknown prop '${key}'`);
@@ -942,28 +986,30 @@ var app = (function () {
     	}
 
     	$$self.$set = $$props => {
+    		if ("id" in $$props) $$invalidate(4, id = $$props.id);
     		if ("title" in $$props) $$invalidate(0, title = $$props.title);
     		if ("subtitle" in $$props) $$invalidate(1, subtitle = $$props.subtitle);
     		if ("date" in $$props) $$invalidate(2, date = $$props.date);
     	};
 
     	$$self.$capture_state = () => {
-    		return { title, subtitle, date };
+    		return { id, title, subtitle, date };
     	};
 
     	$$self.$inject_state = $$props => {
+    		if ("id" in $$props) $$invalidate(4, id = $$props.id);
     		if ("title" in $$props) $$invalidate(0, title = $$props.title);
     		if ("subtitle" in $$props) $$invalidate(1, subtitle = $$props.subtitle);
     		if ("date" in $$props) $$invalidate(2, date = $$props.date);
     	};
 
-    	return [title, subtitle, date, onShowDetails, dispatch, click_handler];
+    	return [title, subtitle, date, onShowDetails, id, dispatch, click_handler];
     }
 
     class Event extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$2, create_fragment$3, safe_not_equal, { title: 0, subtitle: 1, date: 2 });
+    		init(this, options, instance$2, create_fragment$3, safe_not_equal, { id: 4, title: 0, subtitle: 1, date: 2 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -986,6 +1032,14 @@ var app = (function () {
     		if (/*date*/ ctx[2] === undefined && !("date" in props)) {
     			console.warn("<Event> was created without expected prop 'date'");
     		}
+    	}
+
+    	get id() {
+    		throw new Error("<Event>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set id(value) {
+    		throw new Error("<Event>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
     	get title() {
@@ -1299,28 +1353,23 @@ var app = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[11] = list[i].id;
-    	child_ctx[2] = list[i].title;
-    	child_ctx[3] = list[i].subtitle;
-    	child_ctx[4] = list[i].date;
+    	child_ctx[11] = list[i];
     	child_ctx[13] = i;
     	return child_ctx;
     }
 
-    // (62:2) {#each meetups as { id, title, subtitle, date }
+    // (62:2) {#each meetups as meetup, i (meetup.id)}
     function create_each_block(key_1, ctx) {
     	let first;
     	let current;
+    	const event_spread_levels = [/*meetup*/ ctx[11]];
+    	let event_props = {};
 
-    	const event = new Event({
-    			props: {
-    				title: /*title*/ ctx[2],
-    				subtitle: /*subtitle*/ ctx[3],
-    				date: /*date*/ ctx[4]
-    			},
-    			$$inline: true
-    		});
+    	for (let i = 0; i < event_spread_levels.length; i += 1) {
+    		event_props = assign(event_props, event_spread_levels[i]);
+    	}
 
+    	const event = new Event({ props: event_props, $$inline: true });
     	event.$on("click", /*onAddToFavorite*/ ctx[6]);
     	event.$on("message", /*handleMessage*/ ctx[7]);
 
@@ -1338,10 +1387,10 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			const event_changes = {};
-    			if (dirty & /*meetups*/ 1) event_changes.title = /*title*/ ctx[2];
-    			if (dirty & /*meetups*/ 1) event_changes.subtitle = /*subtitle*/ ctx[3];
-    			if (dirty & /*meetups*/ 1) event_changes.date = /*date*/ ctx[4];
+    			const event_changes = (dirty & /*meetups*/ 1)
+    			? get_spread_update(event_spread_levels, [get_spread_object(/*meetup*/ ctx[11])])
+    			: {};
+
     			event.$set(event_changes);
     		},
     		i: function intro(local) {
@@ -1363,7 +1412,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(62:2) {#each meetups as { id, title, subtitle, date }",
+    		source: "(62:2) {#each meetups as meetup, i (meetup.id)}",
     		ctx
     	});
 
@@ -1450,7 +1499,7 @@ var app = (function () {
     		});
 
     	let each_value = /*meetups*/ ctx[0];
-    	const get_key = ctx => /*id*/ ctx[11];
+    	const get_key = ctx => /*meetup*/ ctx[11].id;
 
     	for (let i = 0; i < each_value.length; i += 1) {
     		let child_ctx = get_each_context(ctx, each_value, i);
@@ -1492,8 +1541,8 @@ var app = (function () {
     			add_location(hr0, file$5, 57, 2, 1636);
     			attr_dev(div, "class", "row");
     			add_location(div, file$5, 60, 2, 1694);
-    			add_location(hr1, file$5, 66, 2, 1905);
-    			add_location(b, file$5, 67, 11, 1923);
+    			add_location(hr1, file$5, 66, 2, 1855);
+    			add_location(b, file$5, 67, 11, 1873);
     			add_location(section, file$5, 47, 0, 1087);
     			dispose = listen_dev(form, "submit", prevent_default(/*onAddEvent*/ ctx[5]), false, true, false);
     		},

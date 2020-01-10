@@ -4,6 +4,7 @@
   
   const dispatch = createEventDispatcher();
 
+  export let id = Math.random();
   export let title;
   export let subtitle;
   export let date;

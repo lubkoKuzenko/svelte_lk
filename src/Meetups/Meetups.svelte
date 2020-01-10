@@ -59,8 +59,8 @@
 
   <Title title={"List of Available meetups"} />
   <div class="row">
-		{#each meetups as { id, title, subtitle, date }, i (id)}
-			<Event title={title} subtitle={subtitle} date={date} on:click={onAddToFavorite} on:message={handleMessage} />
+		{#each meetups as meetup, i (meetup.id)}
+			<Event {...meetup} on:click={onAddToFavorite} on:message={handleMessage} />
 		{/each}
 	</div>
 
