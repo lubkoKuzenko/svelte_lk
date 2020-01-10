@@ -1,30 +1,27 @@
 <script>
-	export let name;
+	import Title from './Title.svelte';
+	import Header from './Header.svelte';
+
+	export let name = 'world';
+	export let age = 0;
+
+	$: nameC = `<b>calculation</b> ${age}`;
+	$: if (age > 5){
+		nameC = `Congradulations!`;
+	};
+
+	const onAgeChange = () => age += 1;
+	const onInputChange = (event) => name = event.target.value;
 </script>
 
-<main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
+<Header />
+<main class="container">
+	<Title title={name} />
+	<h3>Age: {age}</h3>
+	<p>{@html nameC}</p>
+	<input type="text" value={name} on:input={onInputChange} />
+	<input type="text" bind:value={name} />
+	<button on:click={onAgeChange}>Change Age</button>
 </main>
 
-<style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
-	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	}
-
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
-	}
-</style>
+<style></style>
