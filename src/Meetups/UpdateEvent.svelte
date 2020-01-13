@@ -15,12 +15,11 @@
 </script>
 
 <form on:submit|preventDefault={onAddEvent}>
-  <TextInput controlType='text' id="title" label="Title:" value={title} on:input={event => title = event.target.value} />
+  <TextInput controlType='text' id="title" label="Title:" value={title} bind:val bind:this={title} />
   <TextInput controlType='textarea' id="subtitle" label="Subtitle:" value={subtitle} on:input={event => subtitle = event.target.value} />
   <TextInput controlType='date' id="date" label="Date:" value={date} on:input={event => date = event.target.value} />
   
   <Button type="submit" size="normal">Add event</Button>
 </form>
-
 
 <style></style>
