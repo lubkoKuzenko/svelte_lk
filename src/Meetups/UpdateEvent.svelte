@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte';
+  import meetupStore from './meetup-store.js';
   import Button from '../components/Button.svelte';
   import TextInput from '../components/TextInput.svelte';
 
@@ -10,12 +11,14 @@
   let date = '';
 
   const onAddEvent = () => {
-    dispatch('newEvent', { title, subtitle, date});
+    meetupStore.update(events => {
+      return [{ id: Math.random(), title, subtitle, date }, ...events];
+    });
   }
 </script>
 
 <form on:submit|preventDefault={onAddEvent}>
-  <TextInput controlType='text' id="title" label="Title:" value={title} bind:val bind:this={title} />
+  <TextInput controlType='text' id="title" label="Title:" value={title} on:input={event => title = event.target.value} />
   <TextInput controlType='textarea' id="subtitle" label="Subtitle:" value={subtitle} on:input={event => subtitle = event.target.value} />
   <TextInput controlType='date' id="date" label="Date:" value={date} on:input={event => date = event.target.value} />
   
