@@ -1,8 +1,7 @@
 <script>
   import Title from '../components/Title.svelte';
   import Event from './Event.svelte';
-  import TextInput from '../components/TextInput.svelte';
-  import Button from '../components/Button.svelte';
+  import UpdateEvent from './UpdateEvent.svelte';
 
   let meetups = [
     { 
@@ -21,16 +20,12 @@
 
   let favoriteEvents = [];
 
-  let title = '';
-  let subtitle = '';
-  let date = '';
-
   const onAddEvent = (event) => {
     const newEvent = {
       id: Math.random(),
-      title,
-      date,
-      subtitle
+      title: event.detail.title,
+      date: event.detail.date,
+      subtitle: event.detail.subtitle
     }
 
     meetups = [newEvent, ...meetups];
@@ -47,13 +42,8 @@
 
 <section>
   <Title title={"New Event"} />
-  <form on:submit|preventDefault={onAddEvent}>
-    <TextInput controlType='text' id="title" label="Title:" value={title} on:input={event => title = event.target.value} />
-    <TextInput controlType='textarea' id="subtitle" label="Subtitle:" value={subtitle} on:input={event => subtitle = event.target.value} />
-    <TextInput controlType='date' id="date" label="Date:" value={date} on:input={event => date = event.target.value} />
-		
-    <Button type="submit" size="normal">Add event</Button>
-	</form>
+
+  <UpdateEvent on:newEvent={onAddEvent} />
 
   <hr />
 
