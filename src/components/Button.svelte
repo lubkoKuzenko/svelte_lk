@@ -1,6 +1,5 @@
 <script>
   export let type;
-  export let label;
   export let size;
 
   let style;
@@ -13,4 +12,4 @@
   };
 </script>
 
-<button type={type} class={style} on:click>{label}</button>
+<button type={type} class={style} on:click><slot /></button>

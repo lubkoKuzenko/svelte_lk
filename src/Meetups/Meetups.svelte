@@ -52,7 +52,7 @@
     <TextInput controlType='textarea' id="subtitle" label="Subtitle:" value={subtitle} on:input={event => subtitle = event.target.value} />
     <TextInput controlType='date' id="date" label="Date:" value={date} on:input={event => date = event.target.value} />
 		
-    <Button type="submit" label="Add event" size="normal" />
+    <Button type="submit" size="normal">Add event</Button>
 	</form>
 
   <hr />

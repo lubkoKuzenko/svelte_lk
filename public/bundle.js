@@ -30,6 +30,32 @@ var app = (function () {
     function safe_not_equal(a, b) {
         return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
     }
+    function create_slot(definition, ctx, $$scope, fn) {
+        if (definition) {
+            const slot_ctx = get_slot_context(definition, ctx, $$scope, fn);
+            return definition[0](slot_ctx);
+        }
+    }
+    function get_slot_context(definition, ctx, $$scope, fn) {
+        return definition[1] && fn
+            ? assign($$scope.ctx.slice(), definition[1](fn(ctx)))
+            : $$scope.ctx;
+    }
+    function get_slot_changes(definition, $$scope, dirty, fn) {
+        if (definition[2] && fn) {
+            const lets = definition[2](fn(dirty));
+            if (typeof $$scope.dirty === 'object') {
+                const merged = [];
+                const len = Math.max($$scope.dirty.length, lets.length);
+                for (let i = 0; i < len; i += 1) {
+                    merged[i] = $$scope.dirty[i] | lets[i];
+                }
+                return merged;
+            }
+            return $$scope.dirty | lets;
+        }
+        return $$scope.dirty;
+    }
 
     function append(target, node) {
         target.appendChild(node);
@@ -668,40 +694,57 @@ var app = (function () {
 
     function create_fragment$2(ctx) {
     	let button;
-    	let t;
+    	let current;
     	let dispose;
+    	const default_slot_template = /*$$slots*/ ctx[4].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[3], null);
 
     	const block = {
     		c: function create() {
     			button = element("button");
-    			t = text(/*label*/ ctx[1]);
+    			if (default_slot) default_slot.c();
     			attr_dev(button, "type", /*type*/ ctx[0]);
-    			attr_dev(button, "class", /*style*/ ctx[2]);
-    			add_location(button, file$2, 15, 0, 262);
-    			dispose = listen_dev(button, "click", /*click_handler*/ ctx[4], false, false, false);
+    			attr_dev(button, "class", /*style*/ ctx[1]);
+    			add_location(button, file$2, 14, 0, 242);
+    			dispose = listen_dev(button, "click", /*click_handler*/ ctx[5], false, false, false);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
-    			append_dev(button, t);
+
+    			if (default_slot) {
+    				default_slot.m(button, null);
+    			}
+
+    			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*label*/ 2) set_data_dev(t, /*label*/ ctx[1]);
+    			if (default_slot && default_slot.p && dirty & /*$$scope*/ 8) {
+    				default_slot.p(get_slot_context(default_slot_template, ctx, /*$$scope*/ ctx[3], null), get_slot_changes(default_slot_template, /*$$scope*/ ctx[3], dirty, null));
+    			}
 
-    			if (dirty & /*type*/ 1) {
+    			if (!current || dirty & /*type*/ 1) {
     				attr_dev(button, "type", /*type*/ ctx[0]);
     			}
 
-    			if (dirty & /*style*/ 4) {
-    				attr_dev(button, "class", /*style*/ ctx[2]);
+    			if (!current || dirty & /*style*/ 2) {
+    				attr_dev(button, "class", /*style*/ ctx[1]);
     			}
     		},
-    		i: noop,
-    		o: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(default_slot, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(default_slot, local);
+    			current = false;
+    		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(button);
+    			if (default_slot) default_slot.d(detaching);
     			dispose();
     		}
     	};
@@ -719,15 +762,16 @@ var app = (function () {
 
     function instance$1($$self, $$props, $$invalidate) {
     	let { type } = $$props;
-    	let { label } = $$props;
     	let { size } = $$props;
     	let style;
     	
-    	const writable_props = ["type", "label", "size"];
+    	const writable_props = ["type", "size"];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<Button> was created with unknown prop '${key}'`);
     	});
+
+    	let { $$slots = {}, $$scope } = $$props;
 
     	function click_handler(event) {
     		bubble($$self, event);
@@ -735,40 +779,39 @@ var app = (function () {
 
     	$$self.$set = $$props => {
     		if ("type" in $$props) $$invalidate(0, type = $$props.type);
-    		if ("label" in $$props) $$invalidate(1, label = $$props.label);
-    		if ("size" in $$props) $$invalidate(3, size = $$props.size);
+    		if ("size" in $$props) $$invalidate(2, size = $$props.size);
+    		if ("$$scope" in $$props) $$invalidate(3, $$scope = $$props.$$scope);
     	};
 
     	$$self.$capture_state = () => {
-    		return { type, label, size, style };
+    		return { type, size, style };
     	};
 
     	$$self.$inject_state = $$props => {
     		if ("type" in $$props) $$invalidate(0, type = $$props.type);
-    		if ("label" in $$props) $$invalidate(1, label = $$props.label);
-    		if ("size" in $$props) $$invalidate(3, size = $$props.size);
-    		if ("style" in $$props) $$invalidate(2, style = $$props.style);
+    		if ("size" in $$props) $$invalidate(2, size = $$props.size);
+    		if ("style" in $$props) $$invalidate(1, style = $$props.style);
     	};
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*size*/ 8) {
+    		if ($$self.$$.dirty & /*size*/ 4) {
     			 if (size === "normal") {
-    				$$invalidate(2, style = "btn btn-primary");
+    				$$invalidate(1, style = "btn btn-primary");
     			} else if (size === "small") {
-    				$$invalidate(2, style = "btn btn-sm btn-outline-secondary");
+    				$$invalidate(1, style = "btn btn-sm btn-outline-secondary");
     			} else {
-    				$$invalidate(2, style = "");
+    				$$invalidate(1, style = "");
     			}
     		}
     	};
 
-    	return [type, label, style, size, click_handler];
+    	return [type, style, size, $$scope, $$slots, click_handler];
     }
 
     class Button extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$2, safe_not_equal, { type: 0, label: 1, size: 3 });
+    		init(this, options, instance$1, create_fragment$2, safe_not_equal, { type: 0, size: 2 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -784,11 +827,7 @@ var app = (function () {
     			console.warn("<Button> was created without expected prop 'type'");
     		}
 
-    		if (/*label*/ ctx[1] === undefined && !("label" in props)) {
-    			console.warn("<Button> was created without expected prop 'label'");
-    		}
-
-    		if (/*size*/ ctx[3] === undefined && !("size" in props)) {
+    		if (/*size*/ ctx[2] === undefined && !("size" in props)) {
     			console.warn("<Button> was created without expected prop 'size'");
     		}
     	}
@@ -798,14 +837,6 @@ var app = (function () {
     	}
 
     	set type(value) {
-    		throw new Error("<Button>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	get label() {
-    		throw new Error("<Button>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set label(value) {
     		throw new Error("<Button>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
@@ -820,6 +851,60 @@ var app = (function () {
 
     /* src/Meetups/Event.svelte generated by Svelte v3.16.7 */
     const file$3 = "src/Meetups/Event.svelte";
+
+    // (25:10) <Button type="button" size="small" on:click={onShowDetails}>
+    function create_default_slot_1(ctx) {
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text("Show Details");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot_1.name,
+    		type: "slot",
+    		source: "(25:10) <Button type=\\\"button\\\" size=\\\"small\\\" on:click={onShowDetails}>",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (26:10) <Button type="button" size="small" on:click>
+    function create_default_slot(ctx) {
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text("Favorite");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot.name,
+    		type: "slot",
+    		source: "(26:10) <Button type=\\\"button\\\" size=\\\"small\\\" on:click>",
+    		ctx
+    	});
+
+    	return block;
+    }
 
     function create_fragment$3(ctx) {
     	let div4;
@@ -845,8 +930,9 @@ var app = (function () {
     	const button0 = new Button({
     			props: {
     				type: "button",
-    				label: "Show Details",
-    				size: "small"
+    				size: "small",
+    				$$slots: { default: [create_default_slot_1] },
+    				$$scope: { ctx }
     			},
     			$$inline: true
     		});
@@ -856,8 +942,9 @@ var app = (function () {
     	const button1 = new Button({
     			props: {
     				type: "button",
-    				label: "Favorite",
-    				size: "small"
+    				size: "small",
+    				$$slots: { default: [create_default_slot] },
+    				$$scope: { ctx }
     			},
     			$$inline: true
     		});
@@ -895,7 +982,7 @@ var app = (function () {
     			attr_dev(div0, "class", "btn-group");
     			add_location(div0, file$3, 23, 8, 649);
     			attr_dev(small, "class", "text-muted");
-    			add_location(small, file$3, 27, 8, 864);
+    			add_location(small, file$3, 27, 8, 860);
     			attr_dev(div1, "class", "d-flex justify-content-between align-items-center");
     			add_location(div1, file$3, 22, 6, 577);
     			attr_dev(div2, "class", "card-body");
@@ -933,6 +1020,20 @@ var app = (function () {
     		p: function update(ctx, [dirty]) {
     			if (!current || dirty & /*title*/ 1) set_data_dev(t1, /*title*/ ctx[0]);
     			if (!current || dirty & /*subtitle*/ 2) set_data_dev(t3, /*subtitle*/ ctx[1]);
+    			const button0_changes = {};
+
+    			if (dirty & /*$$scope*/ 128) {
+    				button0_changes.$$scope = { dirty, ctx };
+    			}
+
+    			button0.$set(button0_changes);
+    			const button1_changes = {};
+
+    			if (dirty & /*$$scope*/ 128) {
+    				button1_changes.$$scope = { dirty, ctx };
+    			}
+
+    			button1.$set(button1_changes);
     			if (!current || dirty & /*date*/ 4) set_data_dev(t7, /*date*/ ctx[2]);
     		},
     		i: function intro(local) {
@@ -1358,6 +1459,33 @@ var app = (function () {
     	return child_ctx;
     }
 
+    // (55:4) <Button type="submit" size="normal">
+    function create_default_slot$1(ctx) {
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text("Add event");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot$1.name,
+    		type: "slot",
+    		source: "(55:4) <Button type=\\\"submit\\\" size=\\\"normal\\\">",
+    		ctx
+    	});
+
+    	return block;
+    }
+
     // (62:2) {#each meetups as meetup, i (meetup.id)}
     function create_each_block(key_1, ctx) {
     	let first;
@@ -1487,8 +1615,9 @@ var app = (function () {
     	const button = new Button({
     			props: {
     				type: "submit",
-    				label: "Add event",
-    				size: "normal"
+    				size: "normal",
+    				$$slots: { default: [create_default_slot$1] },
+    				$$scope: { ctx }
     			},
     			$$inline: true
     		});
@@ -1538,11 +1667,11 @@ var app = (function () {
     			t9 = text(t9_value);
     			t10 = text(" favorite events.");
     			add_location(form, file$5, 49, 2, 1131);
-    			add_location(hr0, file$5, 57, 2, 1636);
+    			add_location(hr0, file$5, 57, 2, 1634);
     			attr_dev(div, "class", "row");
-    			add_location(div, file$5, 60, 2, 1694);
-    			add_location(hr1, file$5, 66, 2, 1855);
-    			add_location(b, file$5, 67, 11, 1873);
+    			add_location(div, file$5, 60, 2, 1692);
+    			add_location(hr1, file$5, 66, 2, 1853);
+    			add_location(b, file$5, 67, 11, 1871);
     			add_location(section, file$5, 47, 0, 1087);
     			dispose = listen_dev(form, "submit", prevent_default(/*onAddEvent*/ ctx[5]), false, true, false);
     		},
@@ -1590,6 +1719,13 @@ var app = (function () {
     			const textinput2_changes = {};
     			if (dirty & /*date*/ 16) textinput2_changes.value = /*date*/ ctx[4];
     			textinput2.$set(textinput2_changes);
+    			const button_changes = {};
+
+    			if (dirty & /*$$scope*/ 16384) {
+    				button_changes.$$scope = { dirty, ctx };
+    			}
+
+    			button.$set(button_changes);
     			const each_value = /*meetups*/ ctx[0];
     			group_outros();
     			each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div, outro_and_destroy_block, create_each_block, null, get_each_context);

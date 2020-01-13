@@ -22,8 +22,8 @@
       <p class="card-text">{subtitle}</p>
       <div class="d-flex justify-content-between align-items-center">
         <div class="btn-group">
-          <Button type="button" label="Show Details" size="small" on:click={onShowDetails} />
-          <Button type="button" label="Favorite" size="small" on:click />
+          <Button type="button" size="small" on:click={onShowDetails}>Show Details</Button>
+          <Button type="button" size="small" on:click>Favorite</Button>
         </div>
         <small class="text-muted">{date}</small>
       </div>
