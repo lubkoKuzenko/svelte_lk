@@ -1,5 +1,5 @@
 <script>
-  import { onDestroy } from 'svelte';
+  // import { onDestroy } from 'svelte';
   import meetupStore from './meetup-store.js';
   import Title from '../components/Title.svelte';
   import Event from './Event.svelte';
@@ -8,13 +8,13 @@
   let meetups = [];
   let favoriteEvents = [];
 
-  const unsubscribe = meetupStore.subscribe(d => meetups = d);
+  // const unsubscribe = meetupStore.subscribe(d => meetups = d);
 
-  onDestroy(() => {
-    if (unsubscribe) {
-      unsubscribe();
-    }
-  });
+  // onDestroy(() => {
+  //   if (unsubscribe) {
+  //     unsubscribe();
+  //   }
+  // });
 
   const onAddToFavorite = (event) => {
     favoriteEvents = [event, ...favoriteEvents];
@@ -32,7 +32,7 @@
 
   <Title title={"List of Available meetups"} />
   <div class="row">
-		{#each meetups as meetup, i (meetup.id)}
+		{#each $meetupStore as meetup, i (meetup.id)}
 			<Event {...meetup} on:click={onAddToFavorite} on:message={handleMessage} />
 		{/each}
 	</div>

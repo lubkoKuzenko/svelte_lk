@@ -30,6 +30,18 @@ var app = (function () {
     function safe_not_equal(a, b) {
         return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
     }
+    function validate_store(store, name) {
+        if (!store || typeof store.subscribe !== 'function') {
+            throw new Error(`'${name}' is not a store with a 'subscribe' method`);
+        }
+    }
+    function subscribe(store, callback) {
+        const unsub = store.subscribe(callback);
+        return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
+    }
+    function component_subscribe(component, store, callback) {
+        component.$$.on_destroy.push(subscribe(store, callback));
+    }
     function create_slot(definition, ctx, $$scope, fn) {
         if (definition) {
             const slot_ctx = get_slot_context(definition, ctx, $$scope, fn);
@@ -112,9 +124,6 @@ var app = (function () {
         if (!current_component)
             throw new Error(`Function called outside component initialization`);
         return current_component;
-    }
-    function onDestroy(fn) {
-        get_current_component().$$.on_destroy.push(fn);
     }
     function createEventDispatcher() {
         const component = get_current_component();
@@ -1748,7 +1757,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (35:2) {#each meetups as meetup, i (meetup.id)}
+    // (35:2) {#each $meetupStore as meetup, i (meetup.id)}
     function create_each_block(key_1, ctx) {
     	let first;
     	let current;
@@ -1777,7 +1786,7 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			const event_changes = (dirty & /*meetups*/ 1)
+    			const event_changes = (dirty & /*$meetupStore*/ 2)
     			? get_spread_update(event_spread_levels, [get_spread_object(/*meetup*/ ctx[5])])
     			: {};
 
@@ -1802,7 +1811,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(35:2) {#each meetups as meetup, i (meetup.id)}",
+    		source: "(35:2) {#each $meetupStore as meetup, i (meetup.id)}",
     		ctx
     	});
 
@@ -1819,7 +1828,7 @@ var app = (function () {
     	let each_1_lookup = new Map();
     	let t3;
     	let b;
-    	let t4_value = /*favoriteEvents*/ ctx[1].length + "";
+    	let t4_value = /*favoriteEvents*/ ctx[0].length + "";
     	let t4;
     	let t5;
     	let current;
@@ -1836,7 +1845,7 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	let each_value = /*meetups*/ ctx[0];
+    	let each_value = /*$meetupStore*/ ctx[1];
     	const get_key = ctx => /*meetup*/ ctx[5].id;
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -1865,9 +1874,9 @@ var app = (function () {
     			t4 = text(t4_value);
     			t5 = text(" favorite events.");
     			attr_dev(div, "class", "row");
-    			add_location(div, file$6, 33, 2, 703);
-    			add_location(b, file$6, 39, 11, 873);
-    			add_location(section, file$6, 27, 0, 591);
+    			add_location(div, file$6, 33, 2, 724);
+    			add_location(b, file$6, 39, 11, 899);
+    			add_location(section, file$6, 27, 0, 612);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1893,11 +1902,11 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			const each_value = /*meetups*/ ctx[0];
+    			const each_value = /*$meetupStore*/ ctx[1];
     			group_outros();
     			each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div, outro_and_destroy_block, create_each_block, null, get_each_context);
     			check_outros();
-    			if ((!current || dirty & /*favoriteEvents*/ 2) && t4_value !== (t4_value = /*favoriteEvents*/ ctx[1].length + "")) set_data_dev(t4, t4_value);
+    			if ((!current || dirty & /*favoriteEvents*/ 1) && t4_value !== (t4_value = /*favoriteEvents*/ ctx[0].length + "")) set_data_dev(t4, t4_value);
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -1946,18 +1955,14 @@ var app = (function () {
     }
 
     function instance$5($$self, $$props, $$invalidate) {
+    	let $meetupStore;
+    	validate_store(meetupStore, "meetupStore");
+    	component_subscribe($$self, meetupStore, $$value => $$invalidate(1, $meetupStore = $$value));
     	let meetups = [];
     	let favoriteEvents = [];
-    	const unsubscribe = meetupStore.subscribe(d => $$invalidate(0, meetups = d));
-
-    	onDestroy(() => {
-    		if (unsubscribe) {
-    			unsubscribe();
-    		}
-    	});
 
     	const onAddToFavorite = event => {
-    		$$invalidate(1, favoriteEvents = [event, ...favoriteEvents]);
+    		$$invalidate(0, favoriteEvents = [event, ...favoriteEvents]);
     	};
 
     	const handleMessage = event => {
@@ -1969,11 +1974,12 @@ var app = (function () {
     	};
 
     	$$self.$inject_state = $$props => {
-    		if ("meetups" in $$props) $$invalidate(0, meetups = $$props.meetups);
-    		if ("favoriteEvents" in $$props) $$invalidate(1, favoriteEvents = $$props.favoriteEvents);
+    		if ("meetups" in $$props) meetups = $$props.meetups;
+    		if ("favoriteEvents" in $$props) $$invalidate(0, favoriteEvents = $$props.favoriteEvents);
+    		if ("$meetupStore" in $$props) meetupStore.set($meetupStore = $$props.$meetupStore);
     	};
 
-    	return [meetups, favoriteEvents, onAddToFavorite, handleMessage];
+    	return [favoriteEvents, $meetupStore, onAddToFavorite, handleMessage];
     }
 
     class Meetups extends SvelteComponentDev {
