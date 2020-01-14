@@ -5,7 +5,7 @@
   import Event from './Event.svelte';
   import UpdateEvent from './UpdateEvent.svelte';
 
-  let meetups = [];
+  // let meetups = [];
   let favoriteEvents = [];
 
   // const unsubscribe = meetupStore.subscribe(d => meetups = d);

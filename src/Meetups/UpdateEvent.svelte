@@ -11,9 +11,7 @@
   let date = '';
 
   const onAddEvent = () => {
-    meetupStore.update(events => {
-      return [{ id: Math.random(), title, subtitle, date }, ...events];
-    });
+    meetupStore.onAddEvent({ id: Math.random(), title, subtitle, date })
   }
 </script>
 

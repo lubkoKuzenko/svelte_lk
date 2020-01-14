@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte';
+  import meetupStore from './meetup-store.js';
   import Button from '../components/Button.svelte';
   
   const dispatch = createEventDispatcher();
@@ -12,6 +13,10 @@
   const onShowDetails = () => {
     dispatch('message', { text: 'Hello!' });
   }
+
+  const onRemove = () => {
+    meetupStore.onRemove(id);
+  }
 </script>
 
 <div class="col-md-4">
@@ -22,8 +27,9 @@
       <p class="card-text">{subtitle}</p>
       <div class="d-flex justify-content-between align-items-center">
         <div class="btn-group">
-          <Button type="button" size="small" on:click={onShowDetails}>Show Details</Button>
+          <Button type="button" size="small" on:click={onShowDetails}>Details</Button>
           <Button type="button" size="small" on:click>Favorite</Button>
+          <Button type="button" size="small" on:click={onRemove}>Remove</Button>
         </div>
         <small class="text-muted">{date}</small>
       </div>
